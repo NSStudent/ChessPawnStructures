@@ -9,7 +9,7 @@ Pensado para indexar bases de partidas (etiquetas por clave de peones), explicar
 - Rápido: `StructureCatalog.mask` ≈ 50 ns por posición (ver [Rendimiento](#rendimiento)).
 
 ```swift
-.package(url: "https://github.com/NSStudent/ChessPawnStructures.git", branch: "main")
+.package(url: "https://github.com/NSStudent/ChessPawnStructures.git", from: "0.1.0")
 ```
 
 ## Uso
