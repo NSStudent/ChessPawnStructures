@@ -248,3 +248,7 @@ python3 Tools/make_sample.py ref-100k.bin Tests/ChessPawnStructuresTests/Resourc
 - Afinar Ruy López cerrada y Formación López (por ejemplo, admitir el peón b negro en b5 o b7 y el c en c5, c6 o c7).
 - Textos de planes por estructura (fuera del alcance del paquete).
 - Prototipos por estructura para «parecidas» al nivel del catálogo (hoy `nearest` compara estructuras concretas).
+
+## Licencia
+
+MIT. Ver [LICENSE](LICENSE).
