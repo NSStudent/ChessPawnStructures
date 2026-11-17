@@ -1,6 +1,6 @@
 # ChessPawnStructures
 
-Estructuras de peones en Swift: un tipo `PawnStructure` sobre dos bitboards, rasgos calculados con operaciones de bits, el catálogo de las 28 estructuras de *Chess Structures* (Flores Rios) más 4 genéricas, y una distancia para buscar estructuras parecidas.
+Estructuras de peones en Swift: un tipo `PawnStructure` sobre dos bitboards, rasgos calculados con operaciones de bits, el catálogo de las 28 estructuras de *Chess Structures* (Flores Rios) más 4 genéricas con textos para mostrarlas (regla y planes, en español e inglés), y una distancia para buscar estructuras parecidas.
 
 Pensado para indexar bases de partidas (etiquetas por clave de peones), explicar la estructura de una posición, construir árboles de estructuras y buscar estructuras parecidas.
 
@@ -27,6 +27,9 @@ s.isolated(.white)                    // bitboard con d4
 s.traits.black.islands                // 2
 s.colorsReversed                      // la misma estructura con colores invertidos
 s.fileKey                             // "11010111/11001111" (modo «Files» de Scid)
+
+s.summary(locale: .current)?.text     // nombre, regla y planes de la estructura principal (es/en)
+StructureKind.carlsbad.text(.english) // textos en la orientación del libro
 
 StructureDistance()(s, otra)          // distancia ponderada
 nearest(s, in: candidatas)            // (index, structure, distance)?
@@ -79,6 +82,26 @@ Los bitboards de peones de Polyglot o python-chess se usan sin conversión: `Paw
 
 Ejemplo: una Maróczy con …g6 cumple también la Dragón; gana Maróczy (4 peones obligados contra 3).
 
+### Textos
+
+Cada estructura (las 28 del libro y las 4 genéricas) tiene, en español y en inglés, una línea con la regla («qué define la estructura») y 2–3 planes típicos por bando. Están escritos para el paquete con ideas generales de dominio público (ataque de minorías, ruptura d4-d5, casilla e5…), no copiados del libro.
+
+| Miembro | Qué hace |
+|---|---|
+| `StructureLanguage` | `.spanish` / `.english`; `init(locale:)` elige español si el idioma es `es` e inglés en cualquier otro caso. |
+| `StructureText` | `name`, `rule`, `whitePlans`, `blackPlans`, `plans(for:)` y `formattedPlans(_:)` (encabezado por bando y una viñeta por plan). |
+| `StructureKind.text(_:)` | Textos en la orientación del libro. |
+| `StructureID.text(_:)` / `text(locale:)` | Textos en esa orientación: con colores invertidos se cambian los bandos, las casillas pasan a su simétrica (d4 ↔ d5, `b2-b4` ↔ `b7-b5`) y los planes blancos son los negros del libro. |
+| `PawnStructure.summary(locale:)` / `summary(_:)` | `StructureSummary` (estructura principal + textos); `nil` si no hay ninguna. |
+
+`swift run pawn-structures-tool texts` vuelca los textos de las 28 del libro en JSON con las claves de la app (`ps_structure_rule_01`…`28` y `ps_structure_plans_01`…`28`, cada una con `es` y `en`).
+
+```swift
+let text = StructureID(.isolatedQueenPawn, reversed: true).text(.spanish)
+text.rule        // "Las negras tienen un peón aislado en d5, sin peones c ni e, y las blancas no tienen peones c ni d."
+text.whitePlans  // ["Bloquear el peón en d4, mejor con un caballo.", …]
+```
+
 ## Definiciones de los rasgos
 
 «Delante» es hacia la fila 8 para las blancas y hacia la fila 1 para las negras; «fila relativa» n es la fila n para las blancas y la 9 − n para las negras. Todos se calculan para las blancas con desplazamientos de bits; los de las negras, con la misma función sobre la estructura con colores invertidos.
@@ -130,8 +153,8 @@ Fuente: los diagramas de apertura de cada capítulo de Flores Rios, *Chess Struc
 | 24 | Dragón (`.dragon`) | Misceláneas | 408 | e4 sin d | d6 g6 sin c | negras e7 | 3 |
 | 25 | Scheveningen (`.scheveningen`) | Misceláneas | 411 | e4 c2\|c3 sin d | d6 e6 sin c |  | 4 |
 | 26 | Benko (`.benko`) | Misceláneas | 415 | d5 e4 sin c | c5 d6 e7 sin ab |  | 5 |
-| 27 | Ruy López cerrada (`.closedRuyLopez`) | Misceláneas | 417 | c3 d5 e4 | b5 d6 e5 c4\|c5 |  | 7 |
-| 28 | Formación López (`.ruyLopezFormation`) | Misceláneas | 421 | c3 d4 e4 | c5 d6 e5 |  | 6 |
+| 27 | Ruy López cerrada (`.closedRuyLopez`) | Misceláneas | 417 | c3 d5 e4 | d6 e5 c4\|c5 | negras b5 | 6 |
+| 28 | Formación López (`.ruyLopezFormation`) | Misceláneas | 421 | c3 d4 e4 | d6 e5 c5\|c6\|c7 | negras c5 | 6 |
 | G | Mayoría en el flanco de dama (`.queensideMajority`) | Genéricas | — | más peones en a–c que las negras; sin d | sin d |  | 1 |
 | G | Peones c doblados (Nimzo-Sämisch) (`.doubledCPawns`) | Genéricas | — | c3 c4 d4 | — |  | 3 |
 | G | Berlinesa (`.berlin`) | Genéricas | — | e5 sin d | c6 c7 sin d |  | 3 |
@@ -141,7 +164,9 @@ Notas:
 
 - **3–3 contra 4–2** es una regla por columnas: las blancas tienen peones exactamente en a, b, c, f, g, h y las negras exactamente en a, b, e, f, g, h.
 - **Mayoría en el flanco de dama** (genérica): ningún bando tiene peones d y las blancas tienen más peones que las negras en a–c. Invertida = mayoría negra.
-- Las dos de la Española salen muy bajas (ver tabla siguiente): la tensión central rara vez dura 6 plies sin cambios y la regla exige muchas casillas. Pendientes de afinar.
+- **Las dos de la Española se afinaron en 0.1.1**, comprobadas con los diagramas del libro (pp. 417 y 421) y con su frecuencia en las mismas 100 000 partidas. Con las reglas de 0.1.0 salían muy bajas porque exigían casillas que el diagrama muestra pero que no definen la estructura:
+  - **Ruy López cerrada**: ya no exige …b5. El peón b negro puede estar en b7 o b6, o haberse cambiado tras a4. Sigue exigiendo el peón c negro en c4 o c5: c3 contra c4/c5 es lo que la separa de la India de Rey Tipo II (c4 contra c5). Admitir también …c7 la mezclaría con el análogo de la India de Rey Tipo III. …b5 queda como típico. Frecuencia: de 0,10 % + 0,01 % a 0,23 % + 0,03 %.
+  - **Formación López**: el peón c negro puede estar en c5 (el diagrama, Chigorin), c6 (Breyer) o c7 (Zaitsev). Es la misma tensión c3-d4-e4 contra …d6-e5 que el libro describe como formación en transición. …c5 queda como típico. Frecuencia: de 0,04 % + 0,01 % a 0,61 % + 0,09 %.
 
 ### Frecuencia (% de partidas)
 
@@ -175,14 +200,14 @@ Una estructura cuenta en una partida si dura ≥ 6 plies seguidos y aparece desd
 | 24 Dragón | 3.03 | 0.47 |
 | 25 Scheveningen | 1.52 | 0.08 |
 | 26 Benko | 0.20 | 0.01 |
-| 27 Ruy López cerrada | 0.10 | 0.01 |
-| 28 Formación López | 0.04 | 0.01 |
+| 27 Ruy López cerrada | 0.23 | 0.03 |
+| 28 Formación López | 0.61 | 0.09 |
 | G Mayoría en el flanco de dama | 20.90 | 15.36 |
 | G Peones c doblados (Nimzo-Sämisch) | 0.38 | 0.20 |
 | G Berlinesa | 0.13 | 0.06 |
 | G Cadena de la Londres/Colle | 1.47 | 2.27 |
 
-Primeras 100 000 partidas de la Lumbras Gigabase OTB 2025 (`LumbrasGigabase_OTB_2025.pgn`), calculado con `pawn-structures-tool compare`. «Libro» = con los colores del diagrama; «invertida» = colores cambiados. Con alguna estructura del libro: 34,4 % de las partidas.
+Primeras 100 000 partidas de la Lumbras Gigabase OTB 2025 (`LumbrasGigabase_OTB_2025.pgn`), calculado con `pawn-structures-tool compare`. «Libro» = con los colores del diagrama; «invertida» = colores cambiados. Con alguna estructura del libro: 35,0 % de las partidas (34,4 % con las reglas de 0.1.0).
 
 ## Distancia entre estructuras
 
@@ -230,8 +255,10 @@ Los pesos dan más importancia a los rasgos que cambian el plan que a la casilla
   - una fixture FEN por estructura (32 posiciones típicas escritas para el paquete, legales según python-chess), en la orientación del libro y con colores invertidos (invertidos por texto, sin usar el código del paquete): cada una cumple su estructura y es la principal;
   - casos límite de cada rasgo (bordes a/h sin envoltura, doblados, retrasado frente a aislado, cadenas, colgantes en filas distintas, agujeros tras g3…);
   - paridad con la referencia en Python sobre una muestra versionada de 3 734 claves (`Tests/…/Resources/reference-sample.txt`), con ejemplos de las 28 estructuras;
+  - las dos reglas afinadas de la Española: sin …b5, con el peón c en c5, c6 o c7, y sin confundirse con el Complejo India de Rey;
+  - textos: regla y 2–3 planes por bando en los dos idiomas para las 32, la regla escrita nombra todas las casillas que exige la regla del catálogo y los textos con colores invertidos cambian bandos, casillas y planes;
   - opcional: con `PAWN_STRUCTURES_REFERENCE=/ruta/ref-100k.bin swift test`, todas las claves de 100 k partidas y los % por estructura contra la referencia.
-- Paridad completa: **0 diferencias en 1 582 642 claves distintas** de las primeras 100 000 partidas de `LumbrasGigabase_OTB_2025.pgn` entre `StructureCatalog.mask` y una implementación de referencia de las mismas reglas escrita aparte en Python (python-chess).
+- Paridad completa (con las reglas de 0.1.1): **0 diferencias en 1 582 642 claves distintas** de las primeras 100 000 partidas de `LumbrasGigabase_OTB_2025.pgn` entre `StructureCatalog.mask` y una implementación de referencia de las mismas reglas escrita aparte en Python (python-chess).
 
 ### Regenerar la referencia
 
@@ -241,13 +268,16 @@ swift run -c release pawn-structures-tool compare ref-100k.bin
 python3 Tools/make_sample.py ref-100k.bin Tests/ChessPawnStructuresTests/Resources/reference-sample.txt
 ```
 
-`dump_reference.py` importa las reglas de referencia (no las copia) y vuelca cada clave con su clasificación en Python y la secuencia de claves de cada partida. Nunca con la base de 13,4 M.
+`dump_reference.py` importa las reglas de referencia (no las copia) y vuelca cada clave con su clasificación en Python y la secuencia de claves de cada partida. Las dos de la Española las toma de `Tools/refined_rules.py` (reglas de 0.1.1). Un volcado hecho antes se puede actualizar con `python3 Tools/refined_rules.py ref-100k.bin ref-100k-011.bin`. Nunca con la base de 13,4 M.
 
 ## Pendiente
 
-- Afinar Ruy López cerrada y Formación López (por ejemplo, admitir el peón b negro en b5 o b7 y el c en c5, c6 o c7).
-- Textos de planes por estructura (fuera del alcance del paquete).
 - Prototipos por estructura para «parecidas» al nivel del catálogo (hoy `nearest` compara estructuras concretas).
+
+## Cambios
+
+- **0.1.1** (en `main`, sin etiqueta): reglas afinadas de Ruy López cerrada y Formación López; textos (regla y planes, es/en) con `StructureText`, `StructureID.text(_:)` y `PawnStructure.summary(locale:)`; subcomando `texts`.
+- **0.1.0**: primera versión.
 
 ## Licencia
 

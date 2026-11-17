@@ -3,7 +3,8 @@ import Testing
 @testable import ChessPawnStructures
 
 /// Comparación con una implementación de referencia de las mismas reglas en Python (python-chess),
-/// escrita aparte. `Tools/dump_reference.py` la importa y vuelca sus resultados.
+/// escrita aparte. `Tools/dump_reference.py` la importa y vuelca sus resultados; las dos estructuras
+/// de la Española (afinadas en 0.1.1) salen de `Tools/refined_rules.py`.
 @Suite("Referencia en Python")
 struct ReferenceTests {
     /// Bits de las 28 estructuras del libro (las genéricas no están en la referencia).
@@ -84,7 +85,7 @@ struct ReferenceTests {
 
 extension ReferenceTests {
     /// Salida del script de medida de referencia sobre `LumbrasGigabase_OTB_2025.pgn` (100 000 partidas):
-    /// (estructura, % libro, % invertida).
+    /// (estructura, % libro, % invertida). Ruy López cerrada y Formación López, con las reglas de 0.1.1.
     static let lumbras2025First100k: [(StructureKind, String, String)] = [
         (.isolatedQueenPawn, "3.45", "3.78"),
         (.hangingPawns, "0.28", "0.38"),
@@ -112,7 +113,7 @@ extension ReferenceTests {
         (.dragon, "3.03", "0.47"),
         (.scheveningen, "1.52", "0.08"),
         (.benko, "0.20", "0.01"),
-        (.closedRuyLopez, "0.10", "0.01"),
-        (.ruyLopezFormation, "0.04", "0.01"),
+        (.closedRuyLopez, "0.23", "0.03"),
+        (.ruyLopezFormation, "0.61", "0.09"),
     ]
 }

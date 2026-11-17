@@ -90,8 +90,29 @@ struct CatalogTests {
         #expect(summary(.maroczy) == ("c4 e4 sin d", "e7 d6|d7 sin c"))
         #expect(summary(.threeThreeVersusFourTwo) == ("columnas abcfgh sin de", "columnas abefgh sin cd"))
         #expect(summary(.benko) == ("d5 e4 sin c", "c5 d6 e7 sin ab"))
-        #expect(summary(.closedRuyLopez) == ("c3 d5 e4", "b5 d6 e5 c4|c5"))
+        #expect(summary(.closedRuyLopez) == ("c3 d5 e4", "d6 e5 c4|c5"))
+        #expect(summary(.ruyLopezFormation) == ("c3 d4 e4", "d6 e5 c5|c6|c7"))
         #expect(summary(.stonewall) == ("d4", "d5 e6 f5"))
+    }
+
+    @Test("Las dos de la Española (0.1.1): sin exigir …b5 y con el peón c en c5, c6 o c7")
+    func ruyLopezRefined() {
+        // Ruy López cerrada sin …b5 (peón b en b7) y con …c4.
+        let closed = Fixtures.pawns("a2 b2 c3 d5 e4 f2 g2 h3", "a6 b7 c4 d6 e5 f7 g7 h7")
+        #expect(StructureCatalog.primary(closed) == StructureID(.closedRuyLopez))
+        #expect(!StructureKind.closedRuyLopez.definition.matchesTypical(closed))
+        // Con …c7 no es Ruy López cerrada (el peón c tiene que estar en c4 o c5).
+        let c7 = Fixtures.pawns("a2 b2 c3 d5 e4 f2 g2 h3", "a6 b5 c7 d6 e5 f7 g7 h7")
+        #expect(!StructureCatalog.classify(c7).contains(StructureID(.closedRuyLopez)))
+        // Formación López con el peón c en c5 (diagrama del libro), c6 (Breyer) y c7 (Zaitsev).
+        for c in ["c5", "c6", "c7"] {
+            let s = Fixtures.pawns("a2 b2 c3 d4 e4 f2 g2 h3", "a6 b5 \(c) d6 e5 f7 g7 h7")
+            #expect(StructureCatalog.primary(s) == StructureID(.ruyLopezFormation), "\(c)")
+            #expect(StructureKind.ruyLopezFormation.definition.matchesTypical(s) == (c == "c5"))
+        }
+        // Con c4 en vez de c3 es el Complejo India de Rey, no la Formación López.
+        let kid = Fixtures.pawns("a2 b2 c4 d4 e4 f2 g2 h2", "a7 b7 c7 d6 e5 f7 g7 h7")
+        #expect(StructureCatalog.primary(kid) == StructureID(.kingsIndianComplex))
     }
 
     @Test("StructureSet y StructureID")

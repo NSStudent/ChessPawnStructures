@@ -2,6 +2,7 @@
 //
 //   swift run -c release pawn-structures-tool bench
 //   swift run -c release pawn-structures-tool compare REFERENCIA.bin
+//   swift run pawn-structures-tool texts      # JSON con ps_structure_rule_XX / ps_structure_plans_XX
 //
 // `compare` lee el volcado de Tools/dump_reference.py y comprueba, clave a clave, que `classify`
 // da lo mismo que las reglas de referencia en Python; después recalcula el % de partidas por
@@ -191,11 +192,33 @@ func catalogTable() {
     }
 }
 
+/// Textos de las 28 estructuras del libro en JSON, con las claves de la app:
+/// `ps_structure_rule_XX` (regla en una línea) y `ps_structure_plans_XX` (planes con viñetas),
+/// cada una con `es` y `en`.
+func textsJSON() {
+    var out: [String: [String: String]] = [:]
+    for kind in StructureCatalog.bookKinds {
+        let number = String(format: "%02d", kind.number!)
+        var rule: [String: String] = [:]
+        var plans: [String: String] = [:]
+        for language in StructureLanguage.allCases {
+            let text = kind.text(language)
+            rule[language.rawValue] = text.rule
+            plans[language.rawValue] = text.formattedPlans(language)
+        }
+        out["ps_structure_rule_\(number)"] = rule
+        out["ps_structure_plans_\(number)"] = plans
+    }
+    let data = try! JSONSerialization.data(withJSONObject: out, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+    print(String(decoding: data, as: UTF8.self))
+}
+
 let args = CommandLine.arguments
 switch args.dropFirst().first {
 case "bench": bench(args.count > 2 ? args[2] : nil)
 case "catalog": catalogTable()
+case "texts": textsJSON()
 case "compare" where args.count > 2: compare(args[2])
 default:
-    print("Uso: pawn-structures-tool catalog | bench [REFERENCIA.bin] | compare REFERENCIA.bin")
+    print("Uso: pawn-structures-tool catalog | texts | bench [REFERENCIA.bin] | compare REFERENCIA.bin")
 }

@@ -6,6 +6,7 @@
 #
 # RULES.py es el fichero de reglas de referencia (define classify(w, b) con
 # nombres "NN Nombre" y "NN Nombre (inv.)"). No se copia aquí: se importa.
+# Las dos estructuras de la Española (27 y 28) se toman de Tools/refined_rules.py (reglas de 0.1.1).
 #
 # Formato (little endian):
 #   "PSR1"
@@ -13,8 +14,11 @@
 #       bit de la máscara = (NN - 1) * 2 + (1 si «(inv.)»)
 #   u32 nGames; por partida: u16 plyInicial, u16 nPlies, nPlies × u32 índice de clave
 #       plyInicial = (jugada - 1) * 2 + (1 si juegan negras) de la posición inicial.
-import importlib.util, struct, sys
+import importlib.util, os, struct, sys
 import chess, chess.pgn
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import refined_rules
 
 rules_path, pgn_path, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
 limit = int(sys.argv[4]) if len(sys.argv) > 4 else 10**9
@@ -61,7 +65,7 @@ with open(out_path, "wb") as out:
     out.write(b"PSR1")
     out.write(struct.pack("<I", len(key_list)))
     for w, bl in key_list:
-        out.write(struct.pack("<QQQ", w, bl, mask(rules.classify(w, bl))))
+        out.write(struct.pack("<QQQ", w, bl, refined_rules.apply(w, bl, mask(rules.classify(w, bl)))))
     out.write(struct.pack("<I", len(games)))
     for initial, seq in games:
         out.write(struct.pack("<HH", initial, min(len(seq), 65535)))

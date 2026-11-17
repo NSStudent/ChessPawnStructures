@@ -331,12 +331,19 @@ public enum StructureCatalog {
         .init(.benko, "Benko", "Benko", .miscellaneous, page: 415,
               white: SidePattern("d5 e4", without: "c"),
               black: SidePattern("c5 d6 e7", without: "ab")),
+        // Las dos de la Española se afinaron en 0.1.1: el diagrama del libro pasa a ser lo «típico».
+        // Ruy López cerrada: ya no se exige …b5 (el peón b puede estar en b7/b6 o haberse cambiado
+        // tras a4). Sigue exigiendo …c4|c5: con c3 contra c4/c5 es la diferencia con la India de Rey II.
         .init(.closedRuyLopez, "Ruy López cerrada", "Closed Ruy Lopez", .miscellaneous, page: 417,
               white: SidePattern("c3 d5 e4"),
-              black: SidePattern("b5 d6 e5 c4|c5")),
+              black: SidePattern("d6 e5 c4|c5"),
+              typical: StructurePattern(black: SidePattern("b5"))),
+        // Formación López: la tensión c3-d4-e4 contra …d6-e5 con el peón c negro en c5, c6 o c7
+        // (Chigorin, Breyer, Zaitsev…). El diagrama del libro, con …c5, queda como lo típico.
         .init(.ruyLopezFormation, "Formación López", "Ruy Lopez formation", .miscellaneous, page: 421,
               white: SidePattern("c3 d4 e4"),
-              black: SidePattern("c5 d6 e5")),
+              black: SidePattern("d6 e5 c5|c6|c7"),
+              typical: StructurePattern(black: SidePattern("c5"))),
         // Genéricas
         .init(.queensideMajority, "Mayoría en el flanco de dama", "Queenside majority", .generic, page: nil,
               condition: .queensideMajority),
