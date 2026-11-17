@@ -9,7 +9,7 @@ Pensado para indexar bases de partidas (etiquetas por clave de peones), explicar
 - Rápido: `StructureCatalog.mask` ≈ 50 ns por posición (ver [Rendimiento](#rendimiento)).
 
 ```swift
-.package(url: "https://github.com/NSStudent/ChessPawnStructures.git", from: "0.1.0")
+.package(url: "https://github.com/NSStudent/ChessPawnStructures.git", from: "0.1.1")
 ```
 
 ## Uso
@@ -276,7 +276,7 @@ python3 Tools/make_sample.py ref-100k.bin Tests/ChessPawnStructuresTests/Resourc
 
 ## Cambios
 
-- **0.1.1** (en `main`, sin etiqueta): reglas afinadas de Ruy López cerrada y Formación López; textos (regla y planes, es/en) con `StructureText`, `StructureID.text(_:)` y `PawnStructure.summary(locale:)`; subcomando `texts`.
+- **0.1.1**: reglas afinadas de Ruy López cerrada y Formación López; textos (regla y planes, es/en) con `StructureText`, `StructureID.text(_:)` y `PawnStructure.summary(locale:)`; subcomando `texts`.
 - **0.1.0**: primera versión.
 
 ## Licencia
